@@ -125,8 +125,8 @@ public class FileServiceImpl implements FileService{
 
     private String saveFile(MultipartFile file) throws IOException {
         String fileName = StringUtils.cleanPath(file.getOriginalFilename());
-        //String folderPath = "/path/to/save/files"; // Dosyaların kaydedileceği klasör yolu
-        String folderPath = "C:/Users/bahad/OneDrive/Masaüstü/dene";
+        String folderPath = "/path/to/save/files"; // Dosyaların kaydedileceği klasör yolu
+        //String folderPath = "C:/Users/bahad/OneDrive/Masaüstü/dene";
         String filePath = folderPath + "/" + fileName;
 
         File directory = new File(folderPath);
