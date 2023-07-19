@@ -2,6 +2,7 @@ package com.bahadirtelef.fileservicemanager.service;
 
 import com.bahadirtelef.fileservicemanager.model.FileModel;
 import com.bahadirtelef.fileservicemanager.repository.FileRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -19,11 +20,11 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 @Transactional
 public class FileServiceImpl implements FileService{
 
-    @Autowired
-    private FileRepository fileRepository;
+    private final FileRepository fileRepository;
 
     private static final int MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
