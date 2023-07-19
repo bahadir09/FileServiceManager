@@ -1,4 +1,4 @@
-package com.bahadirtelef.fileservicemanager.config;
+package com.bahadirtelef.fileservicemanager.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

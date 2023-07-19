@@ -5,6 +5,7 @@ import com.bahadirtelef.fileservicemanager.service.FileService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -30,8 +31,13 @@ public class FileController {
     }
 
     @GetMapping
-    public List<FileModel> getAllFiles() {
-        return fileService.getAllFiles();
+    public ResponseEntity<List<FileModel>> getAllFiles() {
+        List<FileModel> fileList = fileService.getAllFiles();
+        if (!CollectionUtils.isEmpty(fileList)) {
+            return ResponseEntity.ok(fileList);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @GetMapping("/{id}")
