@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.transaction.Transactional;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -15,8 +16,10 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 @Service
+@Transactional
 public class FileServiceImpl implements FileService{
 
     @Autowired
@@ -50,27 +53,64 @@ public class FileServiceImpl implements FileService{
 
     @Override
     public void updateFile(Long fileId, MultipartFile file) throws IOException {
+        String fileName = StringUtils.cleanPath(file.getOriginalFilename());
+        String fileExtension = getFileExtension(fileName);
+        if (file.isEmpty()) {
+            throw new IllegalArgumentException("Dosya boş olamaz.");
+        }
+        if (!isSupportedExtension(fileExtension)) {
+            throw new IllegalArgumentException("Desteklenmeyen dosya uzantısı.");
+        }
 
+        Optional<FileModel> optionalFile = fileRepository.findById(fileId);
+        if (optionalFile.isPresent()) {
+            FileModel existingFile = optionalFile.get();
+
+            String filePath = saveFile(file);
+
+            existingFile.setFileName(fileName);
+            existingFile.setFileExtension(fileExtension);
+            existingFile.setFilePath(filePath);
+            existingFile.setFileSize(file.getSize());
+            fileRepository.save(existingFile);
+        } else {
+            throw new IllegalArgumentException("Dosya Bulunamadı.");
+        }
     }
 
     @Override
     public void deleteFile(Long fileId) {
-
+        Optional<FileModel> optionalFile = fileRepository.findById(fileId);
+        if (optionalFile.isPresent()) {
+            FileModel file = optionalFile.get();
+            try {
+                Files.deleteIfExists(Paths.get(file.getFilePath()));
+                fileRepository.delete(file);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else {
+            throw new IllegalArgumentException("Dosya Bulunamadı.");
+        }
     }
 
     @Override
     public List<FileModel> getAllFiles() {
-        return null;
+        return fileRepository.findAll();
     }
 
     @Override
     public FileModel getFileById(Long fileId) {
-        return null;
+        Optional<FileModel> optionalFile = fileRepository.findById(fileId);
+        return optionalFile.orElse(new FileModel());
     }
 
     @Override
     public byte[] getFileContent(Long fileId) throws IOException {
-        return new byte[0];
+        Optional<FileModel> optionalFile = fileRepository.findById(fileId);
+        FileModel file = optionalFile.get();
+        byte[] fileContent = Files.readAllBytes(Paths.get(file.getFilePath()));
+        return fileContent;
     }
 
     private String getFileExtension(String fileName) {
